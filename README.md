@@ -1,8 +1,11 @@
-# [SVG2Font](kevinkripper.github.io/svg2font/)
+# SVG2Font
 
 A simple tool for turning SVGs into OpenType fonts, inspired by [Glyphter](https://glyphter.com/).
 
-Drop SVG files into a character grid, preview your font, and download an `.otf`.
+Drop `.svg` files into a character grid, preview your font, and download an `.otf`.
+
+## 
+→ [Try it here](https://kevinkripper.github.io/svg2font/) or download the index.html and run it locally.
 
 ## Features
 
