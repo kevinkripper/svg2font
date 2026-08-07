@@ -6,7 +6,7 @@ Drop `.svg` files into a character grid, preview your font, and download an `.ot
 
 ## 
 → [Try it here](https://kevinkripper.github.io/svg2font/) or download the index.html and run it locally.
-##
+
 ## Features
 
 - **Drag & drop SVGs** directly onto character cells.
