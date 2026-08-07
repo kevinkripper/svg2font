@@ -1,4 +1,4 @@
-# SVG2Font
+# [SVG2Font](kevinkripper.github.io/svg2font/)
 
 A simple tool for turning SVGs into OpenType fonts, inspired by [Glyphter](https://glyphter.com/).
 
