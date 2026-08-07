@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SVG2Font by Kevin Kripper</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/opentype.js/1.3.4/opentype.min.js"></script>
+
+<style>
+:root{
+  --bg:#f4f4f1;
+  --panel:#fff;
+  --line:#c9c9c3;
+  --line-soft:#deded8;
+  --ink:#171717;
+  --muted:#74746d;
+  --accent:#222;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  overflow:hidden;
+}
+button,input,textarea{font:inherit}
+button,input,textarea{
+  border:1px solid var(--line);
+  background:#fff;
+  border-radius:6px;
+}
+button{padding:8px 10px;cursor:pointer}
+button:hover:not(:disabled){background:#f7f7f4}
+button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+button.primary:hover:not(:disabled){background:#111}
+button:disabled{opacity:.42;cursor:not-allowed}
+input[type="text"]{padding:9px 10px;width:100%}
+textarea{padding:10px;width:100%;resize:vertical}
+
+.app{
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+.titlebar{
+  height:55px;
+  flex:0 0 55px;
+  display:flex;
+  align-items:center;
+  padding:0 18px;
+  border-bottom:1px solid var(--line);
+  background:rgba(244,244,241,.97);
+}
+.brand{
+  display:flex;
+  align-items:baseline;
+  gap:8px;
+  white-space:nowrap;
+}
+.brand strong{font-size:18px;font-weight:700;letter-spacing:-.01em}
+.brand span{font-size:11px;color:var(--muted)}
+
+.workspace{
+  flex:1;
+  min-height:0;
+  display:grid;
+  grid-template-columns:285px minmax(0,1fr);
+}
+.sidebar{
+  min-height:0;
+  overflow:auto;
+  background:var(--panel);
+  border-right:1px solid var(--line);
+  padding:12px;
+}
+.canvas{
+  min-width:0;
+  min-height:0;
+  overflow:auto;
+  padding:18px;
+}
+.canvas-inner{
+  min-height:100%;
+}
+
+details.section{
+  border:1px solid var(--line-soft);
+  border-radius:8px;
+  background:#fff;
+  margin:0 0 9px;
+  overflow:hidden;
+}
+details.section summary{
+  list-style:none;
+  cursor:pointer;
+  padding:10px 11px;
+  font-size:12px;
+  font-weight:700;
+  user-select:none;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+details.section summary::-webkit-details-marker{display:none}
+details.section summary::after{
+  content:"›";
+  font-size:16px;
+  font-weight:400;
+  color:var(--muted);
+  transform:rotate(90deg);
+  transition:.12s;
+}
+details.section[open] summary::after{transform:rotate(-90deg)}
+.section-body{
+  border-top:1px solid var(--line-soft);
+  padding:11px;
+}
+.field-label{
+  display:block;
+  font-size:11px;
+  color:var(--muted);
+  margin:0 0 5px;
+}
+.toggle{
+  display:flex;
+  align-items:flex-start;
+  gap:7px;
+  font-size:12px;
+  line-height:1.3;
+  margin:3px 0 11px;
+}
+.toggle input{margin:1px 0 0;flex:0 0 auto}
+.hint{
+  font-size:11px;
+  line-height:1.4;
+  color:var(--muted);
+  margin:8px 0 0;
+}
+.control{
+  margin:0 0 12px;
+}
+.control:last-child{margin-bottom:0}
+.control-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  font-size:12px;
+  margin-bottom:5px;
+}
+.control output{
+  color:var(--muted);
+  font-variant-numeric:tabular-nums;
+}
+.control input[type=range]{width:100%;padding:0}
+.two-buttons{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+}
+.two-buttons button{width:100%;font-size:12px}
+.export-buttons{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:7px;
+}
+.status{
+  margin-top:8px;
+  font-size:11px;
+  line-height:1.4;
+  color:var(--muted);
+}
+.try-section textarea{
+  min-height:68px;
+}
+#tryPreview{
+  margin-top:8px;
+  min-height:96px;
+  max-height:180px;
+  overflow:auto;
+  border:1px solid var(--line);
+  border-radius:7px;
+  background:#fff;
+  padding:9px;
+}
+#tryPreview svg{display:block}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(94px,1fr));
+  gap:9px;
+}
+.cell{
+  position:relative;
+  aspect-ratio:1/1;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:8px;
+  overflow:hidden;
+  transition:.12s;
+}
+.cell:hover{border-color:#9c9c95}
+.cell.drag{outline:3px solid #111;outline-offset:1px}
+.cell.loaded{border-color:#777}
+.cell.drag-source{opacity:.45}
+.cell.drop-target{outline:3px solid #111;outline-offset:1px}
+.char{
+  position:absolute;left:7px;top:5px;
+  font-weight:bold;font-size:13px;z-index:2
+}
+.code{
+  position:absolute;right:7px;top:6px;
+  font-size:10px;color:var(--muted);z-index:2
+}
+.preview{
+  position:absolute;inset:22px 9px 10px;
+  display:flex;align-items:center;justify-content:center
+}
+.preview svg{width:100%;height:100%;overflow:visible}
+.empty{
+  font-size:11px;color:#aaa;text-align:center;line-height:1.3
+}
+.remove{
+  display:none;
+  position:absolute;right:5px;bottom:5px;
+  width:22px;height:22px;padding:0;border-radius:50%;z-index:3
+}
+.cell.loaded:hover .remove{display:block}
+
+@media(max-width:800px){
+  body{overflow:auto}
+  .app{height:auto}
+  .workspace{grid-template-columns:1fr}
+  .sidebar{border-right:0;border-bottom:1px solid var(--line);overflow:visible}
+  .canvas{overflow:visible}
+}
+
+/* grid-native character controls */
+.grid-action{
+  aspect-ratio:1/1;
+  border:1px dashed var(--line);
+  border-radius:8px;
+  background:transparent;
+  color:var(--muted);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  text-align:center;
+  cursor:pointer;
+  user-select:none;
+  padding:8px;
+  transition:.12s;
+}
+.grid-action:hover{
+  background:#fff;
+  color:var(--ink);
+  border-color:#9c9c95;
+}
+.grid-action .action-icon{
+  font-size:23px;
+  line-height:1;
+  color:var(--ink);
+}
+.grid-action .action-label{
+  font-size:11px;
+  line-height:1.2;
+}
+.grid-action.active{
+  background:#fff;
+  border-style:solid;
+  border-color:#777;
+  color:var(--ink);
+}
+.custom-slot-remove{
+  position:absolute;
+  right:5px;
+  top:25px;
+  z-index:5;
+  width:19px;
+  height:19px;
+  padding:0;
+  border-radius:50%;
+  font-size:12px;
+  line-height:17px;
+  color:#666;
+  background:#fff;
+  border:1px solid #c8c8c2;
+  display:none;
+}
+.cell.custom-slot:hover .custom-slot-remove{display:block}
+.cell.custom-slot .code{right:7px}
+
+.grid-action{
+  background:#e8e8e3 !important;
+  border-color:#b8b8b0 !important;
+}
+.grid-action:hover{background:#deded8 !important}
+.grid-action.active{
+  background:#d7d7d0 !important;
+  border-color:#777 !important;
+}
+.cell-meta{
+  position:absolute;right:7px;top:5px;z-index:6;
+  display:flex;align-items:center;gap:5px;
+}
+.cell-meta .code{position:static !important}
+.custom-slot-remove{
+  position:static !important;
+  display:inline-block !important;
+  width:auto !important;height:auto !important;
+  padding:0 !important;border:0 !important;
+  border-radius:0 !important;background:transparent !important;
+  color:#c62828 !important;font-size:15px !important;
+  line-height:1 !important;font-weight:700;
+}
+.custom-slot-remove:hover{color:#8e0000 !important;background:transparent !important}
+.cell.custom-slot:hover .custom-slot-remove{display:inline-block !important}
+
+
+/* drag overlay */
+.canvas{position:relative}
+.multi-drop-overlay{
+  position:absolute;
+  inset:0;
+  z-index:100;
+  background:rgba(255,255,255,.58);
+  backdrop-filter:blur(1.5px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .10s ease;
+}
+.multi-drop-overlay.visible{opacity:1}
+.multi-drop-overlay span{
+  background:transparent;
+  border:0;
+  padding:0;
+  font-size:22px;
+  font-weight:700;
+  color:#222;
+  text-shadow:0 2px 10px rgba(0,0,0,.22);
+  box-shadow:none;
+}
+
+
+/*  GUI */
+.sidebar{padding:10px}
+.sidebar-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px}
+.sidebar-actions button{width:100%;font-size:12px;padding:8px 7px}
+.sidebar-actions .download{background:var(--accent);color:#fff;border-color:var(--accent)}
+.sidebar-actions .download:hover:not(:disabled){background:#111}
+.compact-section{border:1px solid var(--line-soft);border-radius:8px;background:#fff;padding:10px;margin-bottom:10px}
+.compact-section h2{margin:0 0 9px;font-size:12px;font-weight:700}
+.compact-section .toggle{margin-bottom:9px}
+.compact-section .control{margin-bottom:9px}
+.compact-section .control:last-child{margin-bottom:0}
+.compact-section input[type="text"]{margin-bottom:9px}
+details.section.try-only{margin-bottom:10px}
+details.section.try-only summary{padding:10px}
+details.section.try-only .section-body{padding:10px}
+.try-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.try-row label{font-size:11px;color:var(--muted);white-space:nowrap}
+.try-row input[type=range]{min-width:0;flex:1}
+.try-row output{width:36px;text-align:right;font-size:11px;color:var(--muted)}
+.try-section textarea{min-height:54px;height:54px;max-height:90px;margin:0}
+#tryPreview{min-height:90px;max-height:230px;overflow:auto;display:block;padding:8px}
+.try-lines{display:flex;flex-wrap:wrap;align-content:flex-start;gap:0;line-height:1}
+.try-token{display:inline-flex;align-items:flex-end;justify-content:center;flex:0 0 auto}
+.try-token svg{width:100%;height:100%;display:block}
+.try-token.normal{font-family:Arial,Helvetica,sans-serif;color:#000;line-height:1}
+.try-token.space{display:inline-block}
+.status{margin-top:7px}
+
+
+.sidebar-actions{
+  grid-template-columns:1fr 1fr 1.35fr;
+}
+.font-name-row{
+  display:grid;
+  grid-template-columns:auto 1fr;
+  align-items:center;
+  gap:8px;
+  margin-bottom:9px;
+}
+.font-name-row label{
+  font-size:11px;
+  color:var(--muted);
+  white-space:nowrap;
+}
+.font-name-row input{
+  margin:0!important;
+  min-width:0;
+}
+.clear-btn{
+  width:100%;
+  margin-top:2px;
+  font-size:12px;
+}
+
+</style>
+
+</head>
+
+<body>
+<div class="app">
+  <div class="titlebar">
+    <div class="brand">
+      <strong>SVG2Font</strong>
+      <span>by Kevin Kripper</span>
+    </div>
+  </div>
+
+  <div class="workspace">
+    
+<aside class="sidebar">
+  <div class="sidebar-actions">
+    <button id="loadProjectBtn">Load</button>
+    <button id="saveProjectBtn">Save</button>
+    <button id="exportBtn" class="download" disabled>Download OTF</button>
+  </div>
+
+  <section class="compact-section">
+    <h2>Font settings</h2>
+
+    <div class="font-name-row">
+      <label for="fontName">Font Name:</label>
+      <input id="fontName" type="text" value="MyIconFont" aria-label="Font name">
+    </div>
+
+    <label class="toggle" title="Remove empty space around each SVG and fit visible artwork to a common height.">
+      <input id="fitArtwork" type="checkbox" checked>
+      <span>Fit to box</span>
+    </label>
+
+    <div class="control">
+      <div class="control-head">
+        <span>Global scale</span>
+        <output id="globalScaleOut">100%</output>
+      </div>
+      <input id="globalScale" type="range" min="70" max="130" value="100">
+    </div>
+
+    <div class="control">
+      <div class="control-head">
+        <span>Vertical offset</span>
+        <output id="verticalOffsetOut">0</output>
+      </div>
+      <input id="verticalOffset" type="range" min="-180" max="180" value="0">
+    </div>
+
+    <button id="clearAll" class="clear-btn">Clear all</button>
+  </section>
+
+  <details class="section try-only" open>
+    <summary>Try your font</summary>
+    <div class="section-body try-section">
+      <div class="try-row">
+        <label for="trySize">Size</label>
+        <input id="trySize" type="range" min="9" max="120" value="24">
+        <output id="trySizeOut">24</output>
+      </div>
+      <textarea id="tryInput" placeholder="Type something..."></textarea>
+      <div id="tryPreview"></div>
+    </div>
+  </details>
+</aside>
+
+
+    <main class="canvas">
+      <div id="multiDropOverlay" class="multi-drop-overlay"><span>Drop SVG files</span></div>
+      <div class="canvas-inner">
+        <input id="sameCase" type="checkbox" checked hidden>
+        <input id="projectFileInput" type="file" accept=".svg2font,application/json" hidden>
+        <div id="status" hidden></div>
+        <div id="grid" class="grid"></div>
+      </div>
+    </main>
+  </div>
+</div>
+<script>
+const baseChars=[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'];
+const lowerChars=[...'abcdefghijklmnopqrstuvwxyz'];
+const commonChars=[...'.,:;!?\'\"-_()[]{}\\/@#$%&*+=<>'];
+const customChars=[];
+let commonVisible=false;
+let chars=[...baseChars,...lowerChars];
+let globalScale=1, verticalOffset=0;
+const glyphs = new Map();
+const grid = document.getElementById('grid');
+const statusEl = document.getElementById('status');
+const exportBtn = document.getElementById('exportBtn');
+const sameCaseEl = document.getElementById('sameCase');
+const fitArtworkEl = document.getElementById('fitArtwork');
+const globalScaleEl=document.getElementById('globalScale');
+const globalScaleOut=document.getElementById('globalScaleOut');
+const verticalOffsetEl=document.getElementById('verticalOffset');
+const verticalOffsetOut=document.getElementById('verticalOffsetOut');
+const tryInput=document.getElementById('tryInput');
+const tryPreview=document.getElementById('tryPreview');
+const saveProjectBtn=document.getElementById('saveProjectBtn');
+const loadProjectBtn=document.getElementById('loadProjectBtn');
+const projectFileInput=document.getElementById('projectFileInput');
+const trySizeEl=document.getElementById('trySize');
+const trySizeOut=document.getElementById('trySizeOut');
+
+function safeName(s){const n=(s||'').trim().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Za-z0-9_-]+/g,'');return n||'MyIconFont'}
+function updateStatus(msg){const unique=new Set([...glyphs.values()]).size;statusEl.textContent=msg||`${unique} glyph${unique===1?'':'s'} loaded · PostScript: ${safeName(document.getElementById('fontName').value)}`;exportBtn.disabled=unique===0||!document.getElementById('fontName').value.trim();renderTryPreview()}
+
+function casePair(ch){
+  if(!ch)return null;
+  const upper=ch.toUpperCase();
+  const lower=ch.toLowerCase();
+  // Only link true one-character Unicode case pairs.
+  if([...upper].length!==1 || [...lower].length!==1 || upper===lower)return null;
+  return {upper,lower};
+}
+
+// Source assignments stay independent. Case sharing is only a reversible view/export rule.
+function getGlyph(ch){
+  const pair=casePair(ch);
+  if(!sameCaseEl.checked || !pair){
+    return glyphs.get(ch) || null;
+  }
+
+  // Lowercase is the linked base alphabet.
+  const builtIn = lowerChars.includes(pair.lower) && baseChars.includes(pair.upper);
+  if(builtIn){
+    return glyphs.get(pair.lower) || glyphs.get(pair.upper) || null;
+  }
+
+  // Custom Unicode glyphs keep independent sources.
+  return glyphs.get(ch) || glyphs.get(ch===pair.lower?pair.upper:pair.lower) || null;
+}
+
+function makeCell(ch){
+  const cell=document.createElement('div');
+  cell.className='cell'+(customChars.includes(ch)?' custom-slot':'');
+  cell.dataset.char=ch;
+  cell.innerHTML=`<span class="char"></span><div class="cell-meta"><span class="code"></span></div><div class="preview"><div class="empty">drop SVG<br>or click</div></div><button class="remove" title="Clear SVG">×</button>`;
+  cell.querySelector('.char').textContent=ch===' '?'space':ch;
+  cell.querySelector('.code').textContent='U+'+ch.codePointAt(0).toString(16).toUpperCase().padStart(4,'0');
+
+  // Custom slots: small red X next to Unicode removes the character slot itself.
+  if(customChars.includes(ch)){
+    const slotRemove=document.createElement('button');
+    slotRemove.className='custom-slot-remove';
+    slotRemove.type='button';
+    slotRemove.title='Remove character slot';
+    slotRemove.textContent='×';
+    slotRemove.addEventListener('click',e=>{e.stopPropagation();removeCustomChar(ch)});
+    cell.querySelector('.cell-meta').appendChild(slotRemove);
+  }
+
+  cell.addEventListener('click',e=>{
+    if(e.target.classList.contains('remove')||e.target.classList.contains('custom-slot-remove'))return;
+    const inp=document.createElement('input');
+    inp.type='file';inp.accept='.svg,image/svg+xml';inp.multiple=true;
+    inp.onchange=async()=>{
+      const files=[...inp.files];
+      if(files.length>1) await importFilesByName(files);
+      else if(files[0]) await loadSvg(ch,files[0]);
+    };
+    inp.click();
+  });
+  cell.draggable=!!getGlyph(ch);
+  cell.addEventListener('dragstart',e=>{
+    const g=getGlyph(ch);
+    if(!g){e.preventDefault();return}
+    e.dataTransfer.setData('text/x-glyph-char',ch);
+    cell.classList.add('drag-source');
+  });
+  cell.addEventListener('dragend',()=>cell.classList.remove('drag-source'));
+  cell.addEventListener('dragover',e=>{e.preventDefault();cell.classList.add('drop-target')});
+  cell.addEventListener('dragleave',()=>cell.classList.remove('drop-target'));
+  cell.addEventListener('drop',async e=>{
+    e.preventDefault();e.stopPropagation();cell.classList.remove('drop-target');
+    const from=e.dataTransfer.getData('text/x-glyph-char');
+    if(from&&getGlyph(from)){
+      assignGlyph(ch,getGlyph(from),`Copied “${from}” → “${ch}”`);
+      return;
+    }
+    const files=[...e.dataTransfer.files].filter(x=>x.type.includes('svg')||x.name.toLowerCase().endsWith('.svg'));
+    if(files.length>1) await importFilesByName(files);
+    else if(files[0]) await loadSvg(ch,files[0]);
+  });
+  cell.querySelector('.remove').addEventListener('click',e=>{e.stopPropagation();removeGlyph(ch)});
+  return cell;
+}
+
+function makeActionCell(type){
+  const cell=document.createElement('button');
+  cell.type='button';
+  cell.className='grid-action';
+
+  if(type==='case'){
+    cell.id='caseGridAction';
+    cell.classList.toggle('active',sameCaseEl.checked);
+    cell.innerHTML=`<span class="action-icon">a↔A</span><span class="action-label">${sameCaseEl.checked?'Linked':'Separate'}</span>`;
+    cell.title='Use the same glyph for uppercase and lowercase versions of a character';
+    cell.onclick=()=>{
+      sameCaseEl.checked=!sameCaseEl.checked;
+      applyCaseMode();
+    };
+  }else if(type==='common'){
+    cell.id='moreChars';
+    cell.classList.toggle('active',commonVisible);
+    cell.innerHTML=`<span class="action-icon">${commonVisible?'−':'+'}</span><span class="action-label">${commonVisible?'Hide common':'Common'}</span>`;
+    cell.onclick=()=>{commonVisible=!commonVisible;rebuildGrid()};
+  }else if(type==='add'){
+    cell.id='addChar';
+    cell.innerHTML='<span class="action-icon">+</span><span class="action-label">Character</span>';
+    cell.onclick=addCustomCharacter;
+  }
+  return cell;
+}
+
+function currentChars(){
+  const out=[...lowerChars];
+
+  // When cases are separate, reveal uppercase as independent slots.
+  if(!sameCaseEl.checked)out.push(...baseChars.slice(0,26));
+
+  // Numbers are always visible.
+  out.push(...baseChars.slice(26));
+
+  if(commonVisible)out.push(...commonChars.filter(c=>!out.includes(c)));
+  out.push(...customChars.filter(c=>!out.includes(c)));
+  return out;
+}
+function rebuildGrid(){
+  chars=currentChars();
+  const fragment=document.createDocumentFragment();
+  for(const ch of chars) fragment.appendChild(makeCell(ch));
+
+  // Grid actions always live at the very end. Should change?
+  fragment.appendChild(makeActionCell('case'));
+  fragment.appendChild(makeActionCell('common'));
+  fragment.appendChild(makeActionCell('add'));
+
+  grid.replaceChildren(fragment);
+  chars.forEach(renderCell);
+  applyCaseVisibility();
+}
+
+function applyCaseVisibility(){}
+
+function assignGlyph(ch,data,msg){
+  const pair=casePair(ch);
+  const builtIn = pair && lowerChars.includes(pair.lower) && baseChars.includes(pair.upper);
+
+  if(sameCaseEl.checked && builtIn){
+    // Store linked base letters on lowercase.
+    glyphs.set(pair.lower,data);
+  }else{
+    // Keep custom glyph sources independent.
+    glyphs.set(ch,data);
+  }
+
+  rebuildGrid();
+  updateStatus(msg);
+}
+
+function addCustomCharacter(){
+  const raw=prompt('Enter one or more characters separated by commas, for example: é, ę, š, →');
+  if(!raw)return;
+
+  const requested=raw
+    .split(',')
+    .map(s=>s.trim())
+    .filter(Boolean)
+    .map(s=>[...s])
+    .filter(chars=>chars.length===1)
+    .map(chars=>chars[0]);
+
+  if(!requested.length)return;
+
+  let added=0;
+  for(const ch of requested){
+    const alreadyKnown=
+      baseChars.includes(ch) ||
+      lowerChars.includes(ch) ||
+      commonChars.includes(ch) ||
+      customChars.includes(ch);
+
+    if(!alreadyKnown){
+      customChars.push(ch);
+      added++;
+    }else if(!currentChars().includes(ch) && !customChars.includes(ch)){
+      customChars.push(ch);
+      added++;
+    }
+  }
+
+  rebuildGrid();
+  if(added)updateStatus(`${added} custom character${added===1?'':'s'} added.`);
+}
+function removeCustomChar(ch){
+  const i=customChars.indexOf(ch);
+  if(i<0)return;
+  customChars.splice(i,1);
+  glyphs.delete(ch);
+  rebuildGrid();
+  updateStatus(`Removed character “${ch}”.`);
+}
+
+function filenameToCharacter(file){
+  const stem=file.name.replace(/\.svg$/i,'');
+  const cps=[...stem];
+  if(cps.length!==1)return null;
+  const ch=cps[0];
+
+  // Only accept characters the app already knows about.
+  const known=new Set([
+    ...baseChars,
+    ...lowerChars,
+    ...commonChars,
+    ...customChars
+  ]);
+  return known.has(ch)?ch:null;
+}
+
+function ensureCharacterVisible(ch){
+  if(baseChars.includes(ch) || lowerChars.includes(ch))return true;
+  if(commonChars.includes(ch)){
+    commonVisible=true;
+    return true;
+  }
+  return customChars.includes(ch);
+}
+
+async function importFilesByName(files){
+  let imported=0;
+  for(const file of files){
+    const ch=filenameToCharacter(file);
+    if(!ch)continue;
+    ensureCharacterVisible(ch);
+    try{
+      await loadSvg(ch,file,{silent:true,noRebuild:true});
+      imported++;
+    }catch(e){}
+  }
+  rebuildGrid();
+  updateStatus(imported?`${imported} SVG${imported===1?'':'s'} imported by filename.`:'No filenames matched a character.');
+}
+
+async function loadSvg(ch,file,opts={}){
+  try{
+    const text=await file.text();
+    const doc=new DOMParser().parseFromString(text,'image/svg+xml');
+    if(doc.querySelector('parsererror')) throw new Error('Invalid SVG');
+    const svg=doc.documentElement;
+    const viewBox=(svg.getAttribute('viewBox')||`0 0 ${svg.getAttribute('width')||1024} ${svg.getAttribute('height')||1024}`).trim().split(/[ ,]+/).map(Number);
+    if(viewBox.length!==4||viewBox.some(Number.isNaN)) throw new Error('Invalid viewBox');
+    const pathEls=[...svg.querySelectorAll('path')].filter(p=>p.getAttribute('d'));
+    if(!pathEls.length) throw new Error('No <path> elements found');
+
+    // Keep fill/stroke information. Stroke-only paths are expanded at export time.
+    const paths=pathEls.map(pe=>{
+      const style=pe.getAttribute('style')||'';
+      const styleValue=name=>{
+        const m=style.match(new RegExp('(?:^|;)\\s*'+name+'\\s*:\\s*([^;]+)','i'));
+        return m?m[1].trim():null;
+      };
+      const attr=name=>pe.getAttribute(name) ?? styleValue(name);
+      const fill=(attr('fill')||'black').trim().toLowerCase();
+      const stroke=(attr('stroke')||'none').trim().toLowerCase();
+      const sw=parseFloat(attr('stroke-width')||'1')||1;
+      const linecap=(attr('stroke-linecap')||'butt').trim().toLowerCase();
+      const linejoin=(attr('stroke-linejoin')||'miter').trim().toLowerCase();
+      return {
+        d:pe.getAttribute('d'),
+        hasFill:fill!=='none' && fill!=='transparent',
+        hasStroke:stroke!=='none' && stroke!=='transparent' && sw>0,
+        strokeWidth:sw,
+        linecap,
+        linejoin
+      };
+    });
+
+    // Browser-measured visible bounds, including an approximation for stroke width.
+    const measure=document.createElementNS('http://www.w3.org/2000/svg','svg');
+    measure.setAttribute('viewBox',viewBox.join(' '));
+    measure.setAttribute('width','1024');
+    measure.setAttribute('height','1024');
+    measure.style.cssText='position:absolute;left:-100000px;top:-100000px;width:1024px;height:1024px;visibility:hidden;overflow:visible';
+    const measureGroup=document.createElementNS('http://www.w3.org/2000/svg','g');
+    for(const pe of pathEls) measureGroup.appendChild(pe.cloneNode(true));
+    measure.appendChild(measureGroup);
+    document.body.appendChild(measure);
+
+    let bbox=null;
+    try{
+      const b=measureGroup.getBBox();
+      if(b && b.width>0 && b.height>0){
+        const maxStroke=Math.max(0,...paths.filter(p=>p.hasStroke).map(p=>p.strokeWidth));
+        const pad=maxStroke/2;
+        bbox={x:b.x-pad,y:b.y-pad,width:b.width+pad*2,height:b.height+pad*2};
+      }
+    }catch(e){}
+    measure.remove();
+
+    const data={text,viewBox,paths,bbox,file:file.name};
+    glyphs.set(ch,data);
+    if(!opts.noRebuild)rebuildGrid();
+    if(!opts.silent){
+      const pair=casePair(ch);
+      updateStatus(sameCaseEl.checked&&pair?`${file.name} → “${pair.upper}/${pair.lower}”`:`${file.name} → “${ch}”`);
+    }
+    return data;
+  }catch(err){
+    if(!opts.silent)updateStatus(`Could not load ${file.name}: ${err.message}`);
+    throw err;
+  }
+}
+
+
+const FONT_METRICS={
+  unitsPerEm:1000,
+  ascender:800,
+  descender:-200,
+  capHeight:700,
+  sidePadding:60
+};
+
+function getGlyphLayout(g){
+  const [vx,vy,vw,vh]=g.viewBox;
+  const visible=g.bbox||{x:vx,y:vy,width:vw,height:vh};
+
+  // Shared transform for grid, preview and export.
+  const source=fitArtworkEl.checked
+    ? visible
+    : {x:vx,y:vy,width:vw,height:vh};
+
+  const fitScale=Math.min(
+    (FONT_METRICS.unitsPerEm-FONT_METRICS.sidePadding*2)/Math.max(1,source.width),
+    FONT_METRICS.capHeight/Math.max(1,source.height)
+  );
+
+  const scale=fitScale*globalScale;
+  const width=source.width*scale;
+  const xOffset=(FONT_METRICS.unitsPerEm-width)/2-source.x*scale;
+  const sourceBottom=source.y+source.height;
+
+  return {
+    source,
+    scale,
+    xOffset,
+    yOffset:verticalOffset,
+    X:x=>xOffset+x*scale,
+    Y:y=>(sourceBottom-y)*scale+verticalOffset
+  };
+}
+
+function getTransformedGeometry(g){
+  const layout=getGlyphLayout(g);
+  const shapes=[];
+
+  for(const item of g.paths){
+    const commands=parsePath(item.d);
+
+    if(item.hasFill){
+      shapes.push({
+        kind:'commands',
+        commands,
+        fillRule:item.fillRule||'nonzero'
+      });
+    }
+
+    if(item.hasStroke){
+      for(const sub of flattenCommands(commands)){
+        const poly=strokeOutline(sub,item.strokeWidth);
+        if(poly.length>=3){
+          shapes.push({
+            kind:'polygon',
+            points:poly,
+            fillRule:'nonzero'
+          });
+        }
+      }
+    }
+  }
+
+  return {layout,shapes};
+}
+function buildFontPreview(g,size=84){
+  const ns='http://www.w3.org/2000/svg';
+  const svg=document.createElementNS(ns,'svg');
+  svg.setAttribute('viewBox','0 -820 1000 1000');
+  svg.setAttribute('width',size);
+  svg.setAttribute('height',size);
+
+  const {layout,shapes}=getTransformedGeometry(g);
+  const {X,Y}=layout;
+
+  for(const shape of shapes){
+    const p=document.createElementNS(ns,'path');
+    let d='';
+
+    if(shape.kind==='polygon'){
+      const pts=shape.points;
+      d=`M${X(pts[0].x)},${-Y(pts[0].y)}`;
+      for(let i=1;i<pts.length;i++)d+=`L${X(pts[i].x)},${-Y(pts[i].y)}`;
+      d+='Z';
+    }else{
+      let last=null,lastCtrl=null;
+      for(const c of shape.commands){
+        if(c.type==='M'){
+          d+=`M${X(c.x)},${-Y(c.y)}`;
+          last=c;lastCtrl=null;
+        }else if(c.type==='L'||c.type==='T'){
+          d+=`L${X(c.x)},${-Y(c.y)}`;
+          last=c;lastCtrl=null;
+        }else if(c.type==='C'){
+          d+=`C${X(c.x1)},${-Y(c.y1)} ${X(c.x2)},${-Y(c.y2)} ${X(c.x)},${-Y(c.y)}`;
+          last=c;lastCtrl={x:c.x2,y:c.y2};
+        }else if(c.type==='S'){
+          const cp=lastCtrl&&last
+            ? {x:2*last.x-lastCtrl.x,y:2*last.y-lastCtrl.y}
+            : {x:last?.x||c.x,y:last?.y||c.y};
+          d+=`C${X(cp.x)},${-Y(cp.y)} ${X(c.x2)},${-Y(c.y2)} ${X(c.x)},${-Y(c.y)}`;
+          last=c;lastCtrl={x:c.x2,y:c.y2};
+        }else if(c.type==='Q'){
+          d+=`Q${X(c.x1)},${-Y(c.y1)} ${X(c.x)},${-Y(c.y)}`;
+          last=c;lastCtrl={x:c.x1,y:c.y1};
+        }else if(c.type==='Z'){
+          d+='Z';
+          lastCtrl=null;
+        }
+      }
+    }
+
+    p.setAttribute('d',d);
+    p.setAttribute('fill','#000');
+    p.setAttribute('fill-rule',shape.fillRule==='evenodd'?'evenodd':'nonzero');
+    svg.appendChild(p);
+  }
+
+  return svg;
+}
+function renderTryPreview(){
+  if(!tryPreview)return;
+  tryPreview.replaceChildren();
+
+  const text=tryInput.value;
+  if(!text)return;
+
+  const size=Number(trySizeEl?.value||24);
+  const wrap=document.createElement('div');
+  wrap.className='try-lines';
+
+  for(const ch of text){
+    if(ch==='\n'){
+      const br=document.createElement('span');
+      br.style.flexBasis='100%';
+      br.style.height='0';
+      wrap.appendChild(br);
+      continue;
+    }
+
+    if(ch===' '){
+      const sp=document.createElement('span');
+      sp.className='try-token space';
+      sp.style.width=(size*.42)+'px';
+      sp.style.height=(size*1.05)+'px';
+      wrap.appendChild(sp);
+      continue;
+    }
+
+    const g=getGlyph(ch);
+    if(g){
+      const token=document.createElement('span');
+      token.className='try-token';
+      token.style.width=(size*1.05)+'px';
+      token.style.height=(size*1.05)+'px';
+      token.appendChild(buildFontPreview(g,size));
+      wrap.appendChild(token);
+    }else{
+      const token=document.createElement('span');
+      token.className='try-token normal';
+      token.style.fontSize=size+'px';
+      token.style.height=(size*1.05)+'px';
+      token.style.padding='0 2px';
+      token.textContent=ch;
+      wrap.appendChild(token);
+    }
+  }
+
+  tryPreview.appendChild(wrap);
+}
+function buildCleanPreview(g){
+  const ns='http://www.w3.org/2000/svg';
+  const [vx,vy,vw,vh]=g.viewBox;
+  const svg=document.createElementNS(ns,'svg');
+  svg.setAttribute('viewBox',`${vx} ${vy} ${vw} ${vh}`);
+  svg.setAttribute('preserveAspectRatio','xMidYMid meet');
+  svg.setAttribute('aria-hidden','true');
+
+  for(const item of g.paths){
+    const path=document.createElementNS(ns,'path');
+    path.setAttribute('d',item.d);
+
+    // Ignore all original colors and text nodes.
+    // Filled paths are solid black; stroke paths are displayed as solid black strokes,
+    // matching the outlined/fill result used for the exported font.
+    path.setAttribute('fill',item.hasFill ? '#000' : 'none');
+
+    if(item.hasStroke){
+      path.setAttribute('stroke','#000');
+      path.setAttribute('stroke-width',String(item.strokeWidth));
+      path.setAttribute('stroke-linecap',item.linecap || 'butt');
+      path.setAttribute('stroke-linejoin',item.linejoin || 'miter');
+    }else{
+      path.setAttribute('stroke','none');
+    }
+
+    svg.appendChild(path);
+  }
+  return svg;
+}
+
+function renderCell(ch){
+  const cell=document.querySelector(`.cell[data-char="${CSS.escape(ch)}"]`);
+  if(!cell)return;
+  const g=getGlyph(ch);
+  cell.classList.toggle('loaded',!!g);
+
+  const preview=cell.querySelector('.preview');
+  preview.replaceChildren();
+
+  if(g){
+    preview.appendChild(buildFontPreview(g,84));
+  }else{
+    const empty=document.createElement('div');
+    empty.className='empty';
+    empty.innerHTML='drop SVG<br>or click';
+    preview.appendChild(empty);
+  }
+}
+function removeGlyph(ch){
+  const pair=casePair(ch);
+  const builtIn = pair && lowerChars.includes(pair.lower) && baseChars.includes(pair.upper);
+
+  if(sameCaseEl.checked && builtIn){
+    glyphs.delete(pair.lower);
+  }else{
+    glyphs.delete(ch);
+  }
+
+  rebuildGrid();
+  updateStatus();
+}
+
+function applyCaseMode(){
+  // Linking never overwrites stored glyphs.
+  rebuildGrid();
+  updateStatus(sameCaseEl.checked?'Lowercase/uppercase linked.':'Lowercase/uppercase independent.');
+}
+sameCaseEl.addEventListener('change',applyCaseMode);
+fitArtworkEl.addEventListener('change',()=>{
+  rebuildGrid();
+  renderTryPreview();
+  updateStatus(fitArtworkEl.checked?'Fit to box enabled.':'Preserve SVG canvas enabled.');
+});
+
+document.getElementById('clearAll').onclick=()=>{glyphs.clear();rebuildGrid();updateStatus('Cleared')};
+globalScaleEl.oninput=()=>{globalScale=Number(globalScaleEl.value)/100;globalScaleOut.textContent=globalScaleEl.value+'%';rebuildGrid();renderTryPreview()};
+verticalOffsetEl.oninput=()=>{verticalOffset=Number(verticalOffsetEl.value);verticalOffsetOut.textContent=verticalOffsetEl.value;rebuildGrid();renderTryPreview()};
+tryInput.oninput=renderTryPreview;
+trySizeEl.oninput=()=>{trySizeOut.textContent=trySizeEl.value;renderTryPreview();};
+document.getElementById('fontName').oninput=()=>updateStatus();
+
+function tokenizePath(d){return d.match(/[a-zA-Z]|[-+]?(?:\d*\.\d+|\d+\.?)(?:[eE][-+]?\d+)?/g)||[]}
+function parsePath(d){
+  const t=tokenizePath(d); let i=0,cmd=null,x=0,y=0,sx=0,sy=0; const out=[];
+  const argc={M:2,L:2,H:1,V:1,C:6,S:4,Q:4,T:2,Z:0};
+  const num=()=>{if(i>=t.length||/^[A-Za-z]$/.test(t[i]))throw new Error('Bad path data');return Number(t[i++])};
+  while(i<t.length){
+    if(/^[A-Za-z]$/.test(t[i]))cmd=t[i++]; if(!cmd)throw new Error('Missing command');
+    const up=cmd.toUpperCase(),rel=cmd!==up;
+    if(up==='Z'){out.push({type:'Z'});x=sx;y=sy;cmd=null;continue}
+    if(!(up in argc))throw new Error(`Unsupported path command ${cmd}`);
+    let first=true;
+    while(i<t.length&&!/^[A-Za-z]$/.test(t[i])){
+      const a=Array.from({length:argc[up]},num); let c=up;
+      if(up==='M'&&!first)c='L';
+      const ax=v=>rel?x+v:v, ay=v=>rel?y+v:v;
+      if(c==='M'||c==='L'||c==='T'){const nx=ax(a[0]),ny=ay(a[1]);out.push({type:c,x:nx,y:ny});x=nx;y=ny;if(c==='M'){sx=x;sy=y}}
+      else if(c==='H'){x=ax(a[0]);out.push({type:'L',x,y})}
+      else if(c==='V'){y=ay(a[0]);out.push({type:'L',x,y})}
+      else if(c==='C'){const x1=ax(a[0]),y1=ay(a[1]),x2=ax(a[2]),y2=ay(a[3]),nx=ax(a[4]),ny=ay(a[5]);out.push({type:'C',x1,y1,x2,y2,x:nx,y:ny});x=nx;y=ny}
+      else if(c==='S'){const x2=ax(a[0]),y2=ay(a[1]),nx=ax(a[2]),ny=ay(a[3]);out.push({type:'S',x2,y2,x:nx,y:ny});x=nx;y=ny}
+      else if(c==='Q'){const x1=ax(a[0]),y1=ay(a[1]),nx=ax(a[2]),ny=ay(a[3]);out.push({type:'Q',x1,y1,x:nx,y:ny});x=nx;y=ny}
+      first=false;
+      if(up==='M')cmd=rel?'l':'L';
+    }
+  }
+  return out;
+}
+
+
+function flattenCommands(commands,steps=28){
+  const subs=[]; let pts=[]; let x=0,y=0,sx=0,sy=0,lastCtrl=null;
+  const push=(px,py)=>{if(!pts.length||Math.hypot(px-pts[pts.length-1].x,py-pts[pts.length-1].y)>.001)pts.push({x:px,y:py})};
+  const finish=(closed=false)=>{if(pts.length>1)subs.push({points:pts,closed});pts=[]};
+  for(const c of commands){
+    if(c.type==='M'){finish(false);x=c.x;y=c.y;sx=x;sy=y;push(x,y);lastCtrl=null}
+    else if(c.type==='L'||c.type==='T'){x=c.x;y=c.y;push(x,y);lastCtrl=null}
+    else if(c.type==='C'){
+      const x0=x,y0=y;
+      for(let i=1;i<=steps;i++){
+        const t=i/steps,u=1-t;
+        push(u*u*u*x0+3*u*u*t*c.x1+3*u*t*t*c.x2+t*t*t*c.x,
+             u*u*u*y0+3*u*u*t*c.y1+3*u*t*t*c.y2+t*t*t*c.y);
+      }
+      x=c.x;y=c.y;lastCtrl={x:c.x2,y:c.y2};
+    }else if(c.type==='S'){
+      const cp=lastCtrl?{x:2*x-lastCtrl.x,y:2*y-lastCtrl.y}:{x,y};
+      const x0=x,y0=y;
+      for(let i=1;i<=steps;i++){
+        const t=i/steps,u=1-t;
+        push(u*u*u*x0+3*u*u*t*cp.x+3*u*t*t*c.x2+t*t*t*c.x,
+             u*u*u*y0+3*u*u*t*cp.y+3*u*t*t*c.y2+t*t*t*c.y);
+      }
+      x=c.x;y=c.y;lastCtrl={x:c.x2,y:c.y2};
+    }else if(c.type==='Q'){
+      const x0=x,y0=y;
+      for(let i=1;i<=steps;i++){
+        const t=i/steps,u=1-t;
+        push(u*u*x0+2*u*t*c.x1+t*t*c.x,
+             u*u*y0+2*u*t*c.y1+t*t*c.y);
+      }
+      x=c.x;y=c.y;lastCtrl={x:c.x1,y:c.y1};
+    }else if(c.type==='Z'){
+      if(pts.length){push(sx,sy);finish(true)}
+      x=sx;y=sy;lastCtrl=null;
+    }
+  }
+  finish(false);
+  return subs;
+}
+
+function strokeOutline(sub,width){
+  let pts=sub.points.slice();
+  if(pts.length<2)return [];
+  if(sub.closed && Math.hypot(pts[0].x-pts[pts.length-1].x,pts[0].y-pts[pts.length-1].y)<.001)pts.pop();
+  const n=pts.length, half=width/2, left=[],right=[];
+  const normal=(a,b)=>{
+    const dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy)||1;
+    return {x:-dy/len,y:dx/len};
+  };
+  for(let i=0;i<n;i++){
+    let nn;
+    if(sub.closed){
+      const n1=normal(pts[(i-1+n)%n],pts[i]),n2=normal(pts[i],pts[(i+1)%n]);
+      const mx=n1.x+n2.x,my=n1.y+n2.y,ml=Math.hypot(mx,my)||1;
+      nn={x:mx/ml,y:my/ml};
+    }else if(i===0)nn=normal(pts[0],pts[1]);
+    else if(i===n-1)nn=normal(pts[n-2],pts[n-1]);
+    else{
+      const n1=normal(pts[i-1],pts[i]),n2=normal(pts[i],pts[i+1]);
+      const mx=n1.x+n2.x,my=n1.y+n2.y,ml=Math.hypot(mx,my)||1;
+      nn={x:mx/ml,y:my/ml};
+    }
+    left.push({x:pts[i].x+nn.x*half,y:pts[i].y+nn.y*half});
+    right.push({x:pts[i].x-nn.x*half,y:pts[i].y-nn.y*half});
+  }
+  return [...left,...right.reverse()];
+}
+
+function addPolygonToPath(p,poly,X,Y){
+  if(poly.length<3)return;
+  p.moveTo(X(poly[0].x),Y(poly[0].y));
+  for(let i=1;i<poly.length;i++)p.lineTo(X(poly[i].x),Y(poly[i].y));
+  p.close();
+}
+
+function toOpenTypePath(g){
+  const p=new opentype.Path();
+  const {layout,shapes}=getTransformedGeometry(g);
+  const {X,Y}=layout;
+
+  for(const shape of shapes){
+    if(shape.kind==='polygon'){
+      addPolygonToPath(p,shape.points,X,Y);
+      continue;
+    }
+
+    let last=null,lastCtrl=null;
+    for(const c of shape.commands){
+      if(c.type==='M'){
+        p.moveTo(X(c.x),Y(c.y));
+        last=c;lastCtrl=null;
+      }else if(c.type==='L'||c.type==='T'){
+        p.lineTo(X(c.x),Y(c.y));
+        last=c;lastCtrl=null;
+      }else if(c.type==='C'){
+        p.curveTo(X(c.x1),Y(c.y1),X(c.x2),Y(c.y2),X(c.x),Y(c.y));
+        last=c;lastCtrl={x:c.x2,y:c.y2};
+      }else if(c.type==='S'){
+        const cp=lastCtrl&&last
+          ? {x:2*last.x-lastCtrl.x,y:2*last.y-lastCtrl.y}
+          : {x:last?.x||c.x,y:last?.y||c.y};
+        p.curveTo(X(cp.x),Y(cp.y),X(c.x2),Y(c.y2),X(c.x),Y(c.y));
+        last=c;lastCtrl={x:c.x2,y:c.y2};
+      }else if(c.type==='Q'){
+        p.quadTo(X(c.x1),Y(c.y1),X(c.x),Y(c.y));
+        last=c;lastCtrl={x:c.x1,y:c.y1};
+      }else if(c.type==='Z'){
+        p.close();
+        lastCtrl=null;
+      }
+    }
+  }
+
+  return p;
+}
+exportBtn.onclick=()=>{
+  try{
+    if(typeof opentype==='undefined')throw new Error('opentype.js did not load. Connect to the internet and reopen this test.');
+    const name=safeName(document.getElementById('fontName').value);
+    const list=[new opentype.Glyph({name:'.notdef',unicode:0,advanceWidth:1000,path:new opentype.Path()})];
+    const exportChars=new Set(glyphs.keys());
+    if(sameCaseEl.checked){
+      for(const ch of [...exportChars]){
+        const pair=casePair(ch);
+        if(pair){exportChars.add(pair.upper);exportChars.add(pair.lower)}
+      }
+    }
+    for(const ch of [...exportChars].sort((a,b)=>a.codePointAt(0)-b.codePointAt(0))){
+      const g=getGlyph(ch);
+      if(!g)continue;
+      list.push(new opentype.Glyph({name:'uni'+ch.codePointAt(0).toString(16).toUpperCase().padStart(4,'0'),unicode:ch.codePointAt(0),advanceWidth:1000,path:toOpenTypePath(g)}));
+    }
+    const font=new opentype.Font({familyName:name,styleName:'Regular',unitsPerEm:FONT_METRICS.unitsPerEm,ascender:FONT_METRICS.ascender,descender:FONT_METRICS.descender,glyphs:list});
+    font.download(name+'.otf'); updateStatus(`Downloaded ${name}.otf`);
+  }catch(err){console.error(err);updateStatus('Export failed: '+err.message)}
+};
+
+
+const ProjectIO={
+  version:1,
+
+  serialize(){
+    return {
+      type:'SVG2FontProject',
+      version:this.version,
+      appVersion:'0.14',
+      fontName:document.getElementById('fontName').value,
+      settings:{
+        sameCase:sameCaseEl.checked,
+        fitToBox:fitArtworkEl.checked,
+        globalScale,
+        verticalOffset,
+        commonVisible
+      },
+      customChars:[...customChars],
+      tryText:tryInput.value,
+      trySize:Number(trySizeEl.value),
+      glyphs:[...glyphs.entries()].map(([character,glyph])=>({
+        character,
+        glyph:{
+          text:glyph.text,
+          viewBox:glyph.viewBox,
+          paths:glyph.paths,
+          bbox:glyph.bbox,
+          file:glyph.file
+        }
+      }))
+    };
+  },
+
+  save(){
+    try{
+      const project=this.serialize();
+      const blob=new Blob(
+        [JSON.stringify(project,null,2)],
+        {type:'application/json'}
+      );
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(blob);
+      a.download=safeName(document.getElementById('fontName').value)+'.svg2font';
+      a.click();
+      setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+      updateStatus(`Saved ${a.download}`);
+    }catch(err){
+      console.error(err);
+      updateStatus('Save Project failed: '+err.message);
+    }
+  },
+
+  async load(file){
+    try{
+      const raw=await file.text();
+      const project=JSON.parse(raw);
+
+      if(!project || project.type!=='SVG2FontProject'){
+        throw new Error('Not a SVG2Font project file.');
+      }
+      if(!Array.isArray(project.glyphs)){
+        throw new Error('Project has no glyph data.');
+      }
+
+      glyphs.clear();
+      customChars.splice(0,customChars.length);
+
+      document.getElementById('fontName').value=project.fontName||'MyIconFont';
+
+      const s=project.settings||{};
+      sameCaseEl.checked=s.sameCase!==false;
+      fitArtworkEl.checked=s.fitToBox!==false;
+      globalScale=Number.isFinite(Number(s.globalScale))?Number(s.globalScale):1;
+      verticalOffset=Number.isFinite(Number(s.verticalOffset))?Number(s.verticalOffset):0;
+      commonVisible=!!s.commonVisible;
+
+      globalScaleEl.value=Math.round(globalScale*100);
+      globalScaleOut.textContent=globalScaleEl.value+'%';
+      verticalOffsetEl.value=Math.round(verticalOffset);
+      verticalOffsetOut.textContent=verticalOffsetEl.value;
+
+      for(const ch of (project.customChars||[])){
+        if([...ch].length===1 && !customChars.includes(ch))customChars.push(ch);
+      }
+
+      for(const entry of project.glyphs){
+        if(!entry || [...(entry.character||'')].length!==1 || !entry.glyph)continue;
+        const g=entry.glyph;
+        if(!Array.isArray(g.viewBox) || !Array.isArray(g.paths))continue;
+        glyphs.set(entry.character,{
+          text:g.text||'',
+          viewBox:g.viewBox,
+          paths:g.paths,
+          bbox:g.bbox||null,
+          file:g.file||`${entry.character}.svg`
+        });
+      }
+
+      tryInput.value=project.tryText||'';
+      trySizeEl.value=Number(project.trySize)||24;
+      trySizeOut.textContent=trySizeEl.value;
+
+      rebuildGrid();
+      renderTryPreview();
+      updateStatus(`Loaded ${file.name}`);
+    }catch(err){
+      console.error(err);
+      updateStatus('Load Project failed: '+err.message);
+    }
+  }
+};
+
+saveProjectBtn.onclick=()=>ProjectIO.save();
+loadProjectBtn.onclick=()=>projectFileInput.click();
+projectFileInput.onchange=async()=>{
+  const file=projectFileInput.files?.[0];
+  projectFileInput.value='';
+  if(file)await ProjectIO.load(file);
+};
+
+
+// Multi-file drag overlay.
+const multiDropOverlay=document.getElementById('multiDropOverlay');
+let overlayHideTimer=null;
+
+function draggedFileCount(e){
+  if(!e.dataTransfer)return 0;
+  // Prefer DataTransfer.items during drag.
+  const items=[...(e.dataTransfer.items||[])];
+  const fileItems=items.filter(item=>item.kind==='file');
+  if(fileItems.length)return fileItems.length;
+  return (e.dataTransfer.files||[]).length;
+}
+
+function isMultiFileDrag(e){
+  return draggedFileCount(e)>1;
+}
+
+function showDropOverlay(){
+  clearTimeout(overlayHideTimer);
+  multiDropOverlay.classList.add('visible');
+}
+
+function hideDropOverlay(){
+  clearTimeout(overlayHideTimer);
+  multiDropOverlay.classList.remove('visible');
+}
+
+document.addEventListener('dragenter',e=>{
+  if(isMultiFileDrag(e))showDropOverlay();
+  else hideDropOverlay();
+});
+
+document.addEventListener('dragover',e=>{
+  // Only show the overlay for multi-file drops.
+  if(e.dataTransfer && [...(e.dataTransfer.types||[])].includes('Files')){
+    e.preventDefault();
+  }
+
+  if(isMultiFileDrag(e)){
+    showDropOverlay();
+    clearTimeout(overlayHideTimer);
+    overlayHideTimer=setTimeout(hideDropOverlay,180);
+  }else{
+    hideDropOverlay();
+  }
+});
+
+document.addEventListener('drop',hideDropOverlay,true);
+document.addEventListener('dragend',hideDropOverlay,true);
+window.addEventListener('blur',hideDropOverlay);
+document.addEventListener('mouseleave',hideDropOverlay);
+
+document.querySelector('.canvas').addEventListener('drop',async e=>{
+  if(e.target.closest('.cell'))return;
+
+  const files=[...e.dataTransfer.files].filter(f=>f.type.includes('svg')||f.name.toLowerCase().endsWith('.svg'));
+  if(files.length<=1)return;
+
+  e.preventDefault();
+  e.stopPropagation();
+  hideDropOverlay();
+  await importFilesByName(files);
+});
+/* SVG2Font init */
+rebuildGrid();
+updateStatus();
+trySizeOut.textContent=trySizeEl.value;
+renderTryPreview();
+</script>
+</body>
+</html>
