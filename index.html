@@ -44,24 +44,6 @@ textarea{padding:10px;width:100%;resize:vertical}
   display:flex;
   flex-direction:column;
 }
-.titlebar{
-  height:55px;
-  flex:0 0 55px;
-  display:flex;
-  align-items:center;
-  padding:0 18px;
-  border-bottom:1px solid var(--line);
-  background:rgba(244,244,241,.97);
-}
-.brand{
-  display:flex;
-  align-items:baseline;
-  gap:8px;
-  white-space:nowrap;
-}
-.brand strong{font-size:18px;font-weight:700;letter-spacing:-.01em}
-.brand span{font-size:11px;color:var(--muted)}
-
 .workspace{
   flex:1;
   min-height:0;
@@ -238,43 +220,6 @@ details.section[open] summary::after{transform:rotate(-90deg)}
 }
 
 /* grid-native character controls */
-.grid-action{
-  aspect-ratio:1/1;
-  border:1px dashed var(--line);
-  border-radius:8px;
-  background:transparent;
-  color:var(--muted);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:5px;
-  text-align:center;
-  cursor:pointer;
-  user-select:none;
-  padding:8px;
-  transition:.12s;
-}
-.grid-action:hover{
-  background:#fff;
-  color:var(--ink);
-  border-color:#9c9c95;
-}
-.grid-action .action-icon{
-  font-size:23px;
-  line-height:1;
-  color:var(--ink);
-}
-.grid-action .action-label{
-  font-size:11px;
-  line-height:1.2;
-}
-.grid-action.active{
-  background:#fff;
-  border-style:solid;
-  border-color:#777;
-  color:var(--ink);
-}
 .custom-slot-remove{
   position:absolute;
   right:5px;
@@ -294,15 +239,6 @@ details.section[open] summary::after{transform:rotate(-90deg)}
 .cell.custom-slot:hover .custom-slot-remove{display:block}
 .cell.custom-slot .code{right:7px}
 
-.grid-action{
-  background:#e8e8e3 !important;
-  border-color:#b8b8b0 !important;
-}
-.grid-action:hover{background:#deded8 !important}
-.grid-action.active{
-  background:#d7d7d0 !important;
-  border-color:#777 !important;
-}
 .cell-meta{
   position:absolute;right:7px;top:5px;z-index:6;
   display:flex;align-items:center;gap:5px;
@@ -351,19 +287,12 @@ details.section[open] summary::after{transform:rotate(-90deg)}
 
 /*  GUI */
 .sidebar{padding:10px}
-.sidebar-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px}
-.sidebar-actions button{width:100%;font-size:12px;padding:8px 7px}
-.sidebar-actions .download{background:var(--accent);color:#fff;border-color:var(--accent)}
-.sidebar-actions .download:hover:not(:disabled){background:#111}
 .compact-section{border:1px solid var(--line-soft);border-radius:8px;background:#fff;padding:10px;margin-bottom:10px}
 .compact-section h2{margin:0 0 9px;font-size:12px;font-weight:700}
 .compact-section .toggle{margin-bottom:9px}
 .compact-section .control{margin-bottom:9px}
 .compact-section .control:last-child{margin-bottom:0}
 .compact-section input[type="text"]{margin-bottom:9px}
-details.section.try-only{margin-bottom:10px}
-details.section.try-only summary{padding:10px}
-details.section.try-only .section-body{padding:10px}
 .try-row{display:flex;align-items:center;gap:8px;margin-bottom:7px}
 .try-row label{font-size:11px;color:var(--muted);white-space:nowrap}
 .try-row input[type=range]{min-width:0;flex:1}
@@ -378,9 +307,6 @@ details.section.try-only .section-body{padding:10px}
 .status{margin-top:7px}
 
 
-.sidebar-actions{
-  grid-template-columns:1fr 1fr 1.35fr;
-}
 .font-name-row{
   display:grid;
   grid-template-columns:auto 1fr;
@@ -403,63 +329,897 @@ details.section.try-only .section-body{padding:10px}
   font-size:12px;
 }
 
+
+.workspace{
+  grid-template-columns:330px minmax(0,1fr);
+}
+.sidebar{
+  padding:0;
+  background:#fff;
+}
+.compact-section{
+  border:0;
+  border-radius:0;
+  border-bottom:1px solid var(--line-soft);
+  margin:0;
+  padding:22px 28px 24px;
+}
+.compact-section h2{
+  margin:0 0 15px;
+  font-size:14px;
+}
+.font-name-row{
+  grid-template-columns:auto 1fr;
+  gap:8px;
+  margin-bottom:12px;
+}
+.font-name-row label{
+  color:var(--ink);
+  font-size:12px;
+}
+.font-name-row input{
+  border-width:0 0 1px 0;
+  border-radius:0;
+  padding:5px 4px;
+  background:transparent;
+}
+.toggle{
+  margin:8px 0 18px;
+  font-size:12px;
+}
+.control{
+  margin:0 0 20px;
+}
+.control-head{
+  margin-bottom:9px;
+}
+.control input[type=range]{
+  width:100%;
+}
+.clear-btn{
+  margin-top:4px;
+  min-height:42px;
+  color:#b3261e;
+  border-color:#d3d3cd;
+}
+.try-section textarea{
+  min-height:84px;
+  height:84px;
+  border-radius:7px;
+  margin-bottom:18px;
+}
+.try-row{
+  margin-bottom:15px;
+}
+#tryPreview{
+  min-height:155px;
+  max-height:270px;
+  padding:16px;
+  border-radius:7px;
+}
+.canvas{
+  padding:18px 24px 28px;
+  background:#fff;
+}
+.grid{
+  grid-template-columns:repeat(auto-fill,minmax(96px,1fr));
+  gap:8px;
+  align-items:start;
+}
+.grid > .cell:first-child{grid-column:1}
+.cell{
+  border-radius:7px;
+}
+.char{
+  left:10px;
+  top:7px;
+  font-size:12px;
+}
+.code{
+  font-size:9px;
+}
+.preview{
+  inset:24px 10px 13px;
+}
+@media(max-width:800px){
+  }
+
+
+:root{
+  --bg:#f4f4f1;
+  --panel:#fff;
+  --line:#c9c9c3;
+  --line-soft:#deded8;
+  --ink:#171717;
+  --muted:#74746d;
+  --accent:#222;
+}
+body{background:var(--bg)}
+.workspace{
+  grid-template-columns:310px minmax(0,1fr);
+}
+.sidebar{
+  background:var(--panel);
+}
+.compact-section{
+  padding:14px 18px 13px;
+  background:var(--panel);
+}
+.compact-section h2{
+  font-size:13px;
+  margin:0 0 10px;
+}
+.font-settings-top{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:10px;
+  margin-bottom:11px;
+}
+.font-name-inline{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  align-items:center;
+  gap:6px;
+}
+.font-name-inline label{
+  font-size:11px;
+  white-space:nowrap;
+}
+.font-name-inline input{
+  min-width:0;
+  margin:0!important;
+  padding:6px 7px;
+  border:1px solid var(--line);
+  border-radius:6px;
+  background:#fff;
+}
+.fit-inline{
+  margin:0!important;
+  align-items:center;
+  white-space:nowrap;
+  font-size:11px;
+}
+.fit-inline input{
+  margin:0!important;
+}
+.control{
+  margin:0 0 10px;
+}
+.control-head{
+  margin-bottom:4px;
+  font-size:11px;
+}
+.control input[type=range]{
+  margin:0;
+}
+.try-row{
+  margin:0 0 8px;
+}
+.try-section textarea{
+  min-height:58px;
+  height:58px;
+  max-height:84px;
+  margin-bottom:8px;
+}
+#tryPreview{
+  min-height:185px;
+  max-height:340px;
+  padding:10px;
+}
+.sidebar-clear{
+  padding:10px 18px 14px;
+  border-top:1px solid var(--line-soft);
+}
+.sidebar-clear .clear-btn{
+  width:100%;
+  min-height:34px;
+  margin:0;
+  color:#a3261f;
+  background:#fff;
+}
+.canvas{
+  background:var(--bg);
+  padding:14px 18px 24px;
+}
+:root{
+  --sidebar-width:310px;
+}
+
+.workspace{
+  grid-template-columns:var(--sidebar-width) minmax(0,1fr);
+}
+
+/* Header/sidebar divider now shares the exact same x position. */
+.btn-icon{
+  width:15px;
+  height:15px;
+  display:inline-flex;
+  flex:0 0 auto;
+}
+.btn-icon svg{
+  width:100%;
+  height:100%;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+.sidebar{
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+  padding:0;
+}
+
+.compact-section{
+  flex:0 0 auto;
+}
+
+.fit-inline{
+  padding:7px 9px;
+  border-radius:6px;
+  background:#e8e8e3;
+  border:1px solid #d1d1ca;
+}
+.fit-inline:hover{
+  background:#deded8;
+}
+
+.try-static{
+  flex:0 0 auto;
+  border-bottom:1px solid var(--line-soft);
+  background:#fff;
+  padding:14px 18px 15px;
+}
+.try-static h2{
+  margin:0 0 10px;
+  font-size:13px;
+  font-weight:700;
+}
+.try-static .try-section{
+  padding:0;
+}
+.try-static .try-row{
+  margin:0 0 8px;
+}
+.try-static textarea{
+  min-height:58px;
+  height:58px;
+  max-height:84px;
+  margin-bottom:8px;
+}
+.try-static #tryPreview{
+  min-height:215px;
+  max-height:360px;
+}
+
+.sidebar-clear{
+  margin-top:auto;
+  flex:0 0 auto;
+  padding:12px 18px 14px;
+  border-top:1px solid var(--line-soft);
+  background:#fff;
+}
+
+/* Old collapsible try styles no longer apply. */
+@media(max-width:800px){
+  .workspace{
+    grid-template-columns:1fr;
+  }
+  .sidebar-clear{
+    margin-top:0;
+  }
+}
+
+
+/* Stronger left-panel hierarchy, still using the same typeface. */
+.sidebar{
+  background:#ecece8;
+  border-right:1px solid #bfbfb8;
+}
+.compact-section,
+.try-static{
+  background:#f6f6f3;
+  border:1px solid #c9c9c3;
+  border-radius:7px;
+  margin:10px 10px 0;
+  box-shadow:0 1px 0 rgba(0,0,0,.04);
+}
+.compact-section{
+  padding:13px 14px 12px;
+}
+.try-static{
+  padding:13px 14px 14px;
+}
+.compact-section h2,
+.try-static h2{
+  letter-spacing:.01em;
+}
+.font-settings-top{
+  gap:8px;
+}
+.fit-inline{
+  background:#dfdfd9;
+  border-color:#bdbdb6;
+}
+.fit-inline:hover{
+  background:#d5d5cf;
+}
+.try-static textarea,
+#tryPreview,
+.font-name-inline input{
+  background:#fff;
+}
+.sidebar-clear{
+  margin-top:auto;
+  padding:10px;
+  background:#ecece8;
+  border-top:0;
+}
+.sidebar-clear .clear-btn{
+  background:#f6f6f3;
+  border-color:#c9c9c3;
+}
+.sidebar-clear .clear-btn:hover{
+  background:#fff;
+}
+
+/* Slight separation between header and working area. */
+.canvas{
+  border-top:0;
+}
+
+
+/* Header: quieter and tighter */
+.btn-icon{
+  width:13px;
+  height:13px;
+}
+
+.compact-section,
+.try-static{
+  margin:8px 8px 0;
+  border-radius:6px;
+}
+.compact-section{
+  padding:11px 12px 10px;
+}
+.try-static{
+  padding:11px 12px 12px;
+}
+.compact-section h2,
+.try-static h2{
+  font-size:12px;
+  margin-bottom:9px;
+}
+.font-settings-top{
+  margin-bottom:9px;
+}
+.font-name-inline label,
+.fit-inline{
+  font-size:10.5px;
+}
+.font-name-inline input{
+  padding:5px 6px;
+  font-size:11px;
+}
+.fit-inline{
+  padding:6px 8px;
+}
+.control{
+  margin-bottom:8px;
+}
+.control-head{
+  font-size:10.5px;
+  margin-bottom:3px;
+}
+
+/* Give the font test more of the available sidebar */
+.try-static textarea{
+  height:52px;
+  min-height:52px;
+  max-height:70px;
+  font-size:11px;
+}
+.try-static #tryPreview{
+  min-height:230px;
+  max-height:390px;
+  margin-top:6px;
+}
+.try-row{
+  margin-bottom:6px;
+}
+.try-row label,
+.try-row output{
+  font-size:10px;
+}
+
+.sidebar-clear{
+  padding:8px;
+}
+.sidebar-clear .clear-btn{
+  min-height:31px;
+  font-size:10.5px;
+}
+
+/* Grid controls: visually a toolbar, not glyph cells */
+/* Cells stay dominant */
+.canvas{
+  padding-top:12px;
+}
+.grid{
+  gap:7px;
+}
+.cell{
+  border-radius:6px;
+}
+.char{
+  font-size:11px;
+}
+.code{
+  font-size:8.5px;
+}
+.empty{
+  font-size:9.5px;
+}
+
+/* Slightly calmer hover states */
+.cell:hover{
+  border-color:#888881;
+}
+.cell.drop-target{
+  outline-width:2px;
+}
+
+
+html,body{height:100%}
+body{overflow:hidden}
+
+.app{
+  height:100vh;
+}
+
+.full-height-layout{
+  display:grid;
+  grid-template-columns:310px minmax(0,1fr);
+  height:100vh;
+  min-height:0;
+}
+
+.sidebar{
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+  height:100vh;
+  overflow:auto;
+  background:#ecece8;
+  border-right:1px solid #bfbfb8;
+}
+
+.sidebar-brand{
+  flex:0 0 auto;
+  padding:15px 18px 14px;
+  background:var(--bg);
+  border-bottom:1px solid var(--line);
+}
+.sidebar-brand .sidebar-brand strong{
+  font-size:17px;
+  line-height:1;
+}
+.sidebar-brand span{
+  font-size:9px;
+  color:var(--muted);
+}
+.sidebar-brand small{
+  display:block;
+  margin-top:4px;
+  font-size:8.5px;
+  line-height:1.25;
+  color:var(--muted);
+}
+
+.project-section{
+  margin-top:8px;
+}
+.project-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+}
+.project-actions button{
+  min-height:32px;
+  padding:6px 8px;
+  font-size:10.5px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+}
+.project-actions .project-download{
+  grid-column:1 / -1;
+}
+
+.canvas{
+  min-width:0;
+  min-height:0;
+  height:100vh;
+  overflow:auto;
+  padding:14px 18px 24px;
+  background:var(--bg);
+  border-top:0;
+}
+
+/* No global header line on the canvas side. */
+.sidebar-clear{
+  margin-top:auto;
+}
+
+@media(max-width:800px){
+  body{overflow:auto}
+  .full-height-layout{
+    grid-template-columns:1fr;
+    height:auto;
+  }
+  .sidebar{
+    height:auto;
+    overflow:visible;
+  }
+  .canvas{
+    height:auto;
+    overflow:visible;
+  }
+}
+
+
+:root{
+  --ui-accent:rgb(90,212,200);
+}
+
+input[type="checkbox"],
+input[type="range"]{
+  accent-color:var(--ui-accent);
+}
+
+.project-actions{
+  grid-template-columns:1fr 1fr 1fr;
+  gap:6px;
+}
+.project-actions .project-download{
+  grid-column:auto;
+}
+.project-actions button{
+  min-width:0;
+  padding-left:5px;
+  padding-right:5px;
+}
+.project-actions .btn-icon{
+  width:12px;
+  height:12px;
+}
+
+.font-name-inline.full-row{
+  grid-template-columns:auto minmax(0,1fr);
+  margin:0;
+}
+
+.grid-section .control{
+  margin-bottom:8px;
+}
+.grid-section .control-head span{
+  text-transform:none;
+}
+
+.try-static h2{
+  margin-bottom:8px;
+}
+
+/* Plus cell at the end of the grid */
+.add-character-cell{
+  position:relative;
+  aspect-ratio:1/1;
+  border:1px dashed #bdbdb6;
+  border-radius:6px;
+  background:#e8e8e3;
+  color:#666;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:5px;
+  cursor:pointer;
+  padding:8px;
+  transition:.12s;
+}
+.add-character-cell:hover{
+  background:#deded8;
+  color:var(--ink);
+  border-color:#888881;
+}
+.add-character-cell .plus{
+  font-size:22px;
+  line-height:1;
+  color:var(--ink);
+}
+.add-character-cell .label{
+  font-size:9.5px;
+}
+
+
+.sidebar-brand{
+  padding-top:12px;
+  padding-bottom:11px;
+}
+.compact-section,
+.try-static{
+  margin:6px 7px 0;
+  padding:9px 10px 9px;
+}
+.compact-section h2,
+.try-static h2{
+  margin-bottom:7px;
+  font-size:11.5px;
+}
+.project-name-row{
+  display:grid;
+  grid-template-columns:auto minmax(0,1fr);
+  gap:6px;
+  align-items:center;
+  margin-bottom:7px;
+}
+.project-name-row label{
+  font-size:9.5px;
+  white-space:nowrap;
+}
+.project-name-row input{
+  min-width:0;
+  padding:5px 6px;
+  border:1px solid var(--line);
+  border-radius:5px;
+  background:#fff;
+  font-size:10.5px;
+}
+.project-actions{
+  grid-template-columns:1fr 1fr 1fr;
+  gap:5px;
+}
+.project-actions button{
+  min-height:29px;
+  padding:5px 4px;
+  font-size:9.5px;
+}
+.project-actions .project-download{grid-column:auto}
+
+.character-map-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:5px;
+}
+.character-map-actions button,
+.setting-toggle{
+  min-height:29px;
+  padding:5px 5px;
+  border:1px solid #bdbdb6;
+  border-radius:5px;
+  background:#e8e8e3;
+  font-size:9.5px;
+}
+.character-map-actions button:hover,
+.setting-toggle:hover{
+  background:#deded8;
+}
+.character-map-actions button.active,
+.setting-toggle.active{
+  background:#d7d7d0;
+  border-color:#888881;
+}
+
+.character-settings-section{
+  padding-bottom:8px;
+}
+.settings-row{
+  display:grid;
+  align-items:center;
+  gap:6px;
+  min-height:29px;
+}
+.scale-row{
+  grid-template-columns:42px auto minmax(0,1fr) 34px;
+}
+.offset-row{
+  grid-template-columns:auto minmax(0,1fr) 28px;
+  margin-top:3px;
+}
+.setting-label{
+  font-size:9.5px;
+  white-space:nowrap;
+}
+.settings-row input[type=range]{
+  min-width:0;
+  width:100%;
+  margin:0;
+}
+.settings-row output{
+  font-size:9px;
+  text-align:right;
+  color:var(--muted);
+}
+
+.try-static{
+  padding-bottom:10px;
+}
+.try-static .try-row{
+  margin-bottom:5px;
+}
+.try-static textarea{
+  height:42px;
+  min-height:42px;
+  max-height:58px;
+  padding:7px;
+}
+.try-static #tryPreview{
+  min-height:190px;
+  max-height:330px;
+  margin-top:5px;
+}
+.sidebar-clear{
+  padding:7px;
+}
+.sidebar-clear .clear-btn{
+  min-height:28px;
+  font-size:9.5px;
+}
+
+
+button:not(:disabled):hover,
+.setting-toggle:hover,
+.character-map-actions button:hover,
+.fit-inline:hover,
+.character-map-actions button.active,
+.setting-toggle.active,
+.cell:hover{
+  border-color:var(--ui-accent) !important;
+}
+
+.cell.drop-target{
+  border-color:var(--ui-accent) !important;
+  outline-color:var(--ui-accent) !important;
+}
+
+.add-character-cell:hover{
+  color:var(--ink);
+}
+
+
+.project-actions .project-download{
+  background:#fff !important;
+  color:var(--ink) !important;
+  border-color:var(--line) !important;
+}
+.project-actions .project-download:hover:not(:disabled){
+  background:rgba(90,212,200,.16) !important;
+  color:var(--ink) !important;
+  border-color:var(--ui-accent) !important;
+}
+
+.sidebar-clear .clear-btn{
+  font-size:11px !important;
+  font-weight:500;
+}
+
+
+/* Accent states */
+button:not(:disabled):hover,
+.setting-toggle:hover,
+.character-map-actions button:hover,
+.add-character-cell:hover,
+.sidebar-clear .clear-btn:hover{
+  border-color:var(--ui-accent) !important;
+  background:rgba(90,212,200,.16) !important;
+  color:var(--ink) !important;
+}
+
+.character-map-actions button.active,
+.setting-toggle.active{
+  border-color:var(--ui-accent) !important;
+  background:rgba(90,212,200,.24) !important;
+  color:var(--ink) !important;
+}
+
+.project-actions .project-download{
+  background:#fff !important;
+  color:var(--ink) !important;
+  border-color:var(--line) !important;
+}
+
+.project-actions .project-download:hover:not(:disabled){
+  border-color:var(--ui-accent) !important;
+  background:rgba(90,212,200,.16) !important;
+  color:var(--ink) !important;
+}
+
+.cell:hover{
+  border-color:var(--ui-accent) !important;
+}
+
+.cell.drop-target{
+  border-color:var(--ui-accent) !important;
+  outline-color:var(--ui-accent) !important;
+}
+
 </style>
 
 </head>
 
 <body>
 <div class="app">
-  <div class="titlebar">
-    <div class="brand">
-      <strong>SVG2Font</strong>
-      <span>by Kevin Kripper</span>
-    </div>
-  </div>
-
-  <div class="workspace">
+  <div class="workspace full-height-layout">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-line">
+          <strong>SVG2Font</strong>
+          <span>by Kevin Kripper</span>
+        </div>
+        <small>Drop SVGs into the grid and download an OpenType font.</small>
+      </div>
     
-<aside class="sidebar">
-  <div class="sidebar-actions">
-    <button id="loadProjectBtn">Load</button>
-    <button id="saveProjectBtn">Save</button>
-    <button id="exportBtn" class="download" disabled>Download OTF</button>
-  </div>
 
-  <section class="compact-section">
-    <h2>Font settings</h2>
-
-    <div class="font-name-row">
+  <section class="compact-section project-section">
+    <h2>Project</h2>
+    <div class="project-name-row">
       <label for="fontName">Font Name:</label>
-      <input id="fontName" type="text" value="MyIconFont" aria-label="Font name">
+      <input id="fontName" type="text" value="MyIconFont" aria-label="Font and project name">
     </div>
-
-    <label class="toggle" title="Remove empty space around each SVG and fit visible artwork to a common height.">
-      <input id="fitArtwork" type="checkbox" checked>
-      <span>Fit to box</span>
-    </label>
-
-    <div class="control">
-      <div class="control-head">
-        <span>Global scale</span>
-        <output id="globalScaleOut">100%</output>
-      </div>
-      <input id="globalScale" type="range" min="70" max="130" value="100">
+    <div class="project-actions">
+      <button id="loadProjectBtn">
+        <span class="btn-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M3 6.5h6l2 2h10v9.5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M3 9h18"/></svg>
+        </span>Load
+      </button>
+      <button id="saveProjectBtn">
+        <span class="btn-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M5 3h12l2 2v16H5z"/><path d="M8 3v6h8V3"/><path d="M8 15h8v6H8z"/></svg>
+        </span>Save
+      </button>
+      <button id="exportBtn" class="primary project-download" disabled>
+        <span class="btn-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M4 20h16"/></svg>
+        </span>OTF
+      </button>
     </div>
-
-    <div class="control">
-      <div class="control-head">
-        <span>Vertical offset</span>
-        <output id="verticalOffsetOut">0</output>
-      </div>
-      <input id="verticalOffset" type="range" min="-180" max="180" value="0">
+  </section>
+<section class="compact-section character-map-section">
+    <h2>Character Map</h2>
+    <div class="character-map-actions">
+      <button id="caseModeBtn" type="button">a ≠ A</button>
+      <button id="commonBtn" type="button">Common</button>
+      <button id="addChar" type="button">+ Char</button>
     </div>
-
-    <button id="clearAll" class="clear-btn">Clear all</button>
   </section>
 
-  <details class="section try-only" open>
-    <summary>Try your font</summary>
-    <div class="section-body try-section">
+  <section class="compact-section character-settings-section">
+    <h2>Character Settings</h2>
+
+    <div class="settings-row scale-row">
+      <button id="fitBtn" class="setting-toggle active" type="button">Fit</button>
+      <span class="setting-label">Scale</span>
+      <input id="globalScale" type="range" min="70" max="130" value="100">
+      <output id="globalScaleOut">100%</output>
+    </div>
+
+    <div class="settings-row offset-row">
+      <span class="setting-label">Vertical Offset</span>
+      <input id="verticalOffset" type="range" min="-180" max="180" value="0">
+      <output id="verticalOffsetOut">0</output>
+    </div>
+
+    <input id="fitArtwork" type="checkbox" checked hidden>
+  </section>
+<section class="try-static">
+    <h2>Font Preview</h2>
+    <div class="try-section">
       <div class="try-row">
         <label for="trySize">Size</label>
         <input id="trySize" type="range" min="9" max="120" value="24">
@@ -468,14 +1228,18 @@ details.section.try-only .section-body{padding:10px}
       <textarea id="tryInput" placeholder="Type something..."></textarea>
       <div id="tryPreview"></div>
     </div>
-  </details>
+  </section>
+
+  <div class="sidebar-clear">
+    <button id="clearAll" class="clear-btn">Clear all</button>
+  </div>
 </aside>
 
 
     <main class="canvas">
       <div id="multiDropOverlay" class="multi-drop-overlay"><span>Drop SVG files</span></div>
       <div class="canvas-inner">
-        <input id="sameCase" type="checkbox" checked hidden>
+        <input id="sameCase" type="checkbox" hidden>
         <input id="projectFileInput" type="file" accept=".svg2font,application/json" hidden>
         <div id="status" hidden></div>
         <div id="grid" class="grid"></div>
@@ -488,7 +1252,7 @@ const baseChars=[...'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'];
 const lowerChars=[...'abcdefghijklmnopqrstuvwxyz'];
 const commonChars=[...'.,:;!?\'\"-_()[]{}\\/@#$%&*+=<>'];
 const customChars=[];
-let commonVisible=false;
+let commonVisible=true;
 let chars=[...baseChars,...lowerChars];
 let globalScale=1, verticalOffset=0;
 const glyphs = new Map();
@@ -508,6 +1272,9 @@ const loadProjectBtn=document.getElementById('loadProjectBtn');
 const projectFileInput=document.getElementById('projectFileInput');
 const trySizeEl=document.getElementById('trySize');
 const trySizeOut=document.getElementById('trySizeOut');
+const caseModeBtn=document.getElementById('caseModeBtn');
+const commonBtn=document.getElementById('commonBtn');
+const fitBtn=document.getElementById('fitBtn');
 
 function safeName(s){const n=(s||'').trim().normalize('NFKD').replace(/[\u0300-\u036f]/g,'').replace(/[^A-Za-z0-9_-]+/g,'');return n||'MyIconFont'}
 function updateStatus(msg){const unique=new Set([...glyphs.values()]).size;statusEl.textContent=msg||`${unique} glyph${unique===1?'':'s'} loaded · PostScript: ${safeName(document.getElementById('fontName').value)}`;exportBtn.disabled=unique===0||!document.getElementById('fontName').value.trim();renderTryPreview()}
@@ -516,12 +1283,12 @@ function casePair(ch){
   if(!ch)return null;
   const upper=ch.toUpperCase();
   const lower=ch.toLowerCase();
-  // Only link true one-character Unicode case pairs.
+  // Only one-character Unicode case pairs.
   if([...upper].length!==1 || [...lower].length!==1 || upper===lower)return null;
   return {upper,lower};
 }
 
-// Source assignments stay independent. Case sharing is only a reversible view/export rule.
+// Case linking never overwrites source assignments.
 function getGlyph(ch){
   const pair=casePair(ch);
   if(!sameCaseEl.checked || !pair){
@@ -546,7 +1313,7 @@ function makeCell(ch){
   cell.querySelector('.char').textContent=ch===' '?'space':ch;
   cell.querySelector('.code').textContent='U+'+ch.codePointAt(0).toString(16).toUpperCase().padStart(4,'0');
 
-  // Custom slots: small red X next to Unicode removes the character slot itself.
+  // Red X removes a custom slot.
   if(customChars.includes(ch)){
     const slotRemove=document.createElement('button');
     slotRemove.className='custom-slot-remove';
@@ -582,7 +1349,20 @@ function makeCell(ch){
     e.preventDefault();e.stopPropagation();cell.classList.remove('drop-target');
     const from=e.dataTransfer.getData('text/x-glyph-char');
     if(from&&getGlyph(from)){
-      assignGlyph(ch,getGlyph(from),`Copied “${from}” → “${ch}”`);
+      const movedGlyph=getGlyph(from);
+      const fromPair=casePair(from);
+      const fromBuiltIn=fromPair && lowerChars.includes(fromPair.lower) && baseChars.includes(fromPair.upper);
+
+      assignGlyph(ch,movedGlyph,`Moved “${from}” → “${ch}”`);
+
+      if(sameCaseEl.checked && fromBuiltIn){
+        glyphs.delete(fromPair.lower);
+      }else{
+        glyphs.delete(from);
+      }
+
+      rebuildGrid();
+      updateStatus(`Moved “${from}” → “${ch}”`);
       return;
     }
     const files=[...e.dataTransfer.files].filter(x=>x.type.includes('svg')||x.name.toLowerCase().endsWith('.svg'));
@@ -593,31 +1373,10 @@ function makeCell(ch){
   return cell;
 }
 
-function makeActionCell(type){
-  const cell=document.createElement('button');
-  cell.type='button';
-  cell.className='grid-action';
-
-  if(type==='case'){
-    cell.id='caseGridAction';
-    cell.classList.toggle('active',sameCaseEl.checked);
-    cell.innerHTML=`<span class="action-icon">a↔A</span><span class="action-label">${sameCaseEl.checked?'Linked':'Separate'}</span>`;
-    cell.title='Use the same glyph for uppercase and lowercase versions of a character';
-    cell.onclick=()=>{
-      sameCaseEl.checked=!sameCaseEl.checked;
-      applyCaseMode();
-    };
-  }else if(type==='common'){
-    cell.id='moreChars';
-    cell.classList.toggle('active',commonVisible);
-    cell.innerHTML=`<span class="action-icon">${commonVisible?'−':'+'}</span><span class="action-label">${commonVisible?'Hide common':'Common'}</span>`;
-    cell.onclick=()=>{commonVisible=!commonVisible;rebuildGrid()};
-  }else if(type==='add'){
-    cell.id='addChar';
-    cell.innerHTML='<span class="action-icon">+</span><span class="action-label">Character</span>';
-    cell.onclick=addCustomCharacter;
-  }
-  return cell;
+function syncCharacterMapControls(){
+  caseModeBtn.textContent=sameCaseEl.checked?'a = A':'a ≠ A';
+  caseModeBtn.classList.toggle('active',sameCaseEl.checked);
+  commonBtn.classList.toggle('active',commonVisible);
 }
 
 function currentChars(){
@@ -636,19 +1395,23 @@ function currentChars(){
 function rebuildGrid(){
   chars=currentChars();
   const fragment=document.createDocumentFragment();
+
   for(const ch of chars) fragment.appendChild(makeCell(ch));
 
-  // Grid actions always live at the very end. Should change?
-  fragment.appendChild(makeActionCell('case'));
-  fragment.appendChild(makeActionCell('common'));
-  fragment.appendChild(makeActionCell('add'));
+  const addCell=document.createElement('button');
+  addCell.type='button';
+  addCell.className='add-character-cell';
+  addCell.innerHTML='<span class="plus">+</span><span class="label">Character</span>';
+  addCell.title='Add custom character';
+  addCell.onclick=addCustomCharacter;
+  fragment.appendChild(addCell);
 
   grid.replaceChildren(fragment);
+
+  syncCharacterMapControls();
   chars.forEach(renderCell);
-  applyCaseVisibility();
 }
 
-function applyCaseVisibility(){}
 
 function assignGlyph(ch,data,msg){
   const pair=casePair(ch);
@@ -760,7 +1523,7 @@ async function loadSvg(ch,file,opts={}){
     const pathEls=[...svg.querySelectorAll('path')].filter(p=>p.getAttribute('d'));
     if(!pathEls.length) throw new Error('No <path> elements found');
 
-    // Keep fill/stroke information. Stroke-only paths are expanded at export time.
+    // Stroke-only paths are outlined at export.
     const paths=pathEls.map(pe=>{
       const style=pe.getAttribute('style')||'';
       const styleValue=name=>{
@@ -783,7 +1546,7 @@ async function loadSvg(ch,file,opts={}){
       };
     });
 
-    // Browser-measured visible bounds, including an approximation for stroke width.
+    // Visible bounds used by Fit.
     const measure=document.createElementNS('http://www.w3.org/2000/svg','svg');
     measure.setAttribute('viewBox',viewBox.join(' '));
     measure.setAttribute('width','1024');
@@ -832,7 +1595,7 @@ function getGlyphLayout(g){
   const [vx,vy,vw,vh]=g.viewBox;
   const visible=g.bbox||{x:vx,y:vy,width:vw,height:vh};
 
-  // Shared transform for grid, preview and export.
+  // Shared grid/preview/export transform.
   const source=fitArtworkEl.checked
     ? visible
     : {x:vx,y:vy,width:vw,height:vh};
@@ -993,36 +1756,6 @@ function renderTryPreview(){
 
   tryPreview.appendChild(wrap);
 }
-function buildCleanPreview(g){
-  const ns='http://www.w3.org/2000/svg';
-  const [vx,vy,vw,vh]=g.viewBox;
-  const svg=document.createElementNS(ns,'svg');
-  svg.setAttribute('viewBox',`${vx} ${vy} ${vw} ${vh}`);
-  svg.setAttribute('preserveAspectRatio','xMidYMid meet');
-  svg.setAttribute('aria-hidden','true');
-
-  for(const item of g.paths){
-    const path=document.createElementNS(ns,'path');
-    path.setAttribute('d',item.d);
-
-    // Ignore all original colors and text nodes.
-    // Filled paths are solid black; stroke paths are displayed as solid black strokes,
-    // matching the outlined/fill result used for the exported font.
-    path.setAttribute('fill',item.hasFill ? '#000' : 'none');
-
-    if(item.hasStroke){
-      path.setAttribute('stroke','#000');
-      path.setAttribute('stroke-width',String(item.strokeWidth));
-      path.setAttribute('stroke-linecap',item.linecap || 'butt');
-      path.setAttribute('stroke-linejoin',item.linejoin || 'miter');
-    }else{
-      path.setAttribute('stroke','none');
-    }
-
-    svg.appendChild(path);
-  }
-  return svg;
-}
 
 function renderCell(ch){
   const cell=document.querySelector(`.cell[data-char="${CSS.escape(ch)}"]`);
@@ -1062,10 +1795,30 @@ function applyCaseMode(){
   updateStatus(sameCaseEl.checked?'Lowercase/uppercase linked.':'Lowercase/uppercase independent.');
 }
 sameCaseEl.addEventListener('change',applyCaseMode);
-fitArtworkEl.addEventListener('change',()=>{
+
+caseModeBtn.onclick=()=>{
+  sameCaseEl.checked=!sameCaseEl.checked;
+  applyCaseMode();
+};
+
+commonBtn.onclick=()=>{
+  commonVisible=!commonVisible;
+  rebuildGrid();
+};
+
+document.getElementById('addChar').onclick=addCustomCharacter;
+
+fitBtn.onclick=()=>{
+  fitArtworkEl.checked=!fitArtworkEl.checked;
+  fitBtn.classList.toggle('active',fitArtworkEl.checked);
   rebuildGrid();
   renderTryPreview();
-  updateStatus(fitArtworkEl.checked?'Fit to box enabled.':'Preserve SVG canvas enabled.');
+};
+
+
+fitArtworkEl.addEventListener('change',()=>{
+  rebuildGrid();
+  updateStatus(fitArtworkEl.checked?'Fit enabled.':'Fit disabled.');
 });
 
 document.getElementById('clearAll').onclick=()=>{glyphs.clear();rebuildGrid();updateStatus('Cleared')};
@@ -1073,7 +1826,28 @@ globalScaleEl.oninput=()=>{globalScale=Number(globalScaleEl.value)/100;globalSca
 verticalOffsetEl.oninput=()=>{verticalOffset=Number(verticalOffsetEl.value);verticalOffsetOut.textContent=verticalOffsetEl.value;rebuildGrid();renderTryPreview()};
 tryInput.oninput=renderTryPreview;
 trySizeEl.oninput=()=>{trySizeOut.textContent=trySizeEl.value;renderTryPreview();};
+trySizeEl.ondblclick=()=>{
+  trySizeEl.value=24;
+  trySizeOut.textContent='24';
+  renderTryPreview();
+};
 document.getElementById('fontName').oninput=()=>updateStatus();
+
+globalScaleEl.ondblclick=()=>{
+  globalScaleEl.value=100;
+  globalScale=1;
+  globalScaleOut.textContent='100%';
+  rebuildGrid();
+  renderTryPreview();
+};
+verticalOffsetEl.ondblclick=()=>{
+  verticalOffsetEl.value=0;
+  verticalOffset=0;
+  verticalOffsetOut.textContent='0';
+  rebuildGrid();
+  renderTryPreview();
+};
+
 
 function tokenizePath(d){return d.match(/[a-zA-Z]|[-+]?(?:\d*\.\d+|\d+\.?)(?:[eE][-+]?\d+)?/g)||[]}
 function parsePath(d){
@@ -1317,6 +2091,7 @@ const ProjectIO={
       globalScale=Number.isFinite(Number(s.globalScale))?Number(s.globalScale):1;
       verticalOffset=Number.isFinite(Number(s.verticalOffset))?Number(s.verticalOffset):0;
       commonVisible=!!s.commonVisible;
+      fitBtn.classList.toggle('active',fitArtworkEl.checked);
 
       globalScaleEl.value=Math.round(globalScale*100);
       globalScaleOut.textContent=globalScaleEl.value+'%';
@@ -1363,13 +2138,13 @@ projectFileInput.onchange=async()=>{
 };
 
 
-// Multi-file drag overlay.
+// Multi-file drop overlay.
 const multiDropOverlay=document.getElementById('multiDropOverlay');
 let overlayHideTimer=null;
 
 function draggedFileCount(e){
   if(!e.dataTransfer)return 0;
-  // Prefer DataTransfer.items during drag.
+  
   const items=[...(e.dataTransfer.items||[])];
   const fileItems=items.filter(item=>item.kind==='file');
   if(fileItems.length)return fileItems.length;
@@ -1396,7 +2171,7 @@ document.addEventListener('dragenter',e=>{
 });
 
 document.addEventListener('dragover',e=>{
-  // Only show the overlay for multi-file drops.
+  
   if(e.dataTransfer && [...(e.dataTransfer.types||[])].includes('Files')){
     e.preventDefault();
   }
@@ -1426,6 +2201,8 @@ document.querySelector('.canvas').addEventListener('drop',async e=>{
   hideDropOverlay();
   await importFilesByName(files);
 });
+fitBtn.classList.toggle('active',fitArtworkEl.checked);
+
 /* SVG2Font init */
 rebuildGrid();
 updateStatus();
